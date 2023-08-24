@@ -20,10 +20,9 @@ const selectSkill = (users_id) => {
 // INSERT skill
 const insertSkill = (data) => {
   const { users_id } = data;
-  const id = uuidv4(); 
   return Pool.query(
-    `INSERT INTO skill (id, users_id) 
-    VALUES( '${id}','${users_id}')`
+    `INSERT INTO skill (users_id) 
+    VALUES( '${users_id}')`
   );
 };
 
