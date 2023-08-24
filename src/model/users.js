@@ -1,4 +1,6 @@
 const Pool = require("../config/db");
+const { v4: uuidv4 } = require("uuid");
+
 
 //GET ALL USERS
 const selectAllUsers = ({ limit, offset, sort, sortby }) => {
@@ -49,14 +51,16 @@ const createUsers = (data) => {
 
 const createPerekrut = (data_perekrut) => {
   const { users_id, nama_perusahaan } = data_perekrut;
-  const qry = `INSERT INTO perekrut(users_id, nama_perusahaan) VALUES ($1, $2)`;
-  return Pool.query(qry, [users_id, nama_perusahaan]);
+  const id = uuidv4(); 
+  const qry = `INSERT INTO perekrut(id, users_id, nama_perusahaan) VALUES ($1, $2, $3)`;
+  return Pool.query(qry, [id, users_id, nama_perusahaan]);
 };
 
 const createPekerja = (data) => {
   const { users_id } = data;
-  const qry = `INSERT INTO pekerja(users_id) VALUES ($1)`;
-  return Pool.query(qry, [users_id]);
+  const id = uuidv4(); 
+  const qry = `INSERT INTO pekerja(id, users_id) VALUES ($1, $2, )`;
+  return Pool.query(qry, [id, users_id]);
 };
 
 

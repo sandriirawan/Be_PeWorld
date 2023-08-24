@@ -1,4 +1,4 @@
--- Active: 1690780015370@@127.0.0.1@5432@peworld
+-- Active: 1692888884745@@147.139.210.135@5432@sandri01
 CREATE TABLE users (
     id VARCHAR PRIMARY KEY,
     email VARCHAR(255) NOT NULL,
@@ -18,7 +18,7 @@ DROP TABLE pengalaman;
 DROP TABLE portofolio;
 
 CREATE TABLE perekrut (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id VARCHAR PRIMARY KEY,
     users_id VARCHAR NOT NULL,
     foto_perusahaan VARCHAR(255),
     nama_perusahaan VARCHAR(255),
@@ -33,7 +33,7 @@ CREATE TABLE perekrut (
 
 
 CREATE TABLE pekerja (
-    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id VARCHAR PRIMARY KEY,
     users_id VARCHAR NOT NULL,
     foto_pekerja VARCHAR(255),
     job_desk VARCHAR(255),
@@ -41,21 +41,20 @@ CREATE TABLE pekerja (
     tempat_kerja VARCHAR(255),
     provinsi VARCHAR(100),
     kota VARCHAR(100),
-    email VARCHAR.
     instagram VARCHAR,
     github VARCHAR,
     linkedin VARCHAR
 );
 
 ALTER TABLE pekerja
-ADD COLUMN ;
+ADD COLUMN email VARCHAR(100);
 
 SELECT * FROM pekerja;
 
 
 
 CREATE TABLE skill (
-     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+     id VARCHAR PRIMARY KEY,
     users_id VARCHAR NOT NULL,
     nama_skill VARCHAR 
 );
