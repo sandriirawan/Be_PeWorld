@@ -4,6 +4,9 @@ const jwt = require("jsonwebtoken");
 const Joi = require("joi");
 const authHelper = require("../helper/auth");
 const commonHelper = require("../helper/common");
+const sendEmail = require("../middlewares/sendEmail");
+const crypto = require("crypto");
+
 const {
   selectAllUsers,
   selectUsers,
@@ -14,6 +17,11 @@ const {
   findUUID,
   findEmail,
   countData,
+  createUsersVerification,
+  checkUsersVerification,
+  cekUser,
+  deleteUsersVerification,
+  updateAccountVerification,
 } = require("../model/users");
 const { insertSkill } = require("../model/skill");
 
@@ -43,19 +51,14 @@ const userSchema = Joi.object({
 });
 
 const loginSchema = Joi.object({
-  email: Joi.string()
-    .required()
-    .messages({
-      'string.email': 'Email salah, masukkan email yang valid',
-      'any.required': 'Email harus diisi',
-    }),
-  password: Joi.string()
-    .min(8) 
-    .required()
-    .messages({
-      'string.min': 'Password harus mengandung minimal {#limit} karakter',
-      'any.required': 'Password harus diisi',
-    }),
+  email: Joi.string().required().messages({
+    "string.email": "Email salah, masukkan email yang valid",
+    "any.required": "Email harus diisi",
+  }),
+  password: Joi.string().min(8).required().messages({
+    "string.min": "Password harus mengandung minimal {#limit} karakter",
+    "any.required": "Password harus diisi",
+  }),
 });
 
 const usersController = {
@@ -117,11 +120,22 @@ const usersController = {
       if (rowCount) {
         return res.json({ message: "Email Already Taken" });
       }
+
       let role = req.params.role;
       const id = uuidv4();
       const passwordHash = bcrypt.hashSync(password, 10);
       const confirmpasswordHash = bcrypt.hashSync(confirmpassword, 10);
       const jabatanValue = jabatan !== undefined ? jabatan : null;
+      // verification
+      const verify = "false";
+
+      const users_verification_id = uuidv4().toLocaleLowerCase();
+      // const users_id = id;
+      const token = crypto.randomBytes(64).toString("hex");
+
+      // url localhost
+      const url = `${process.env.BASE_URL}users/verify?id=${id}&token=${token}`;
+      await sendEmail(email, "Verify Email", url);
       const data = {
         id,
         name,
@@ -131,21 +145,86 @@ const usersController = {
         confirmpasswordHash,
         jabatan: jabatanValue,
         role,
+        verify,
       };
       let data_perekrut = {
         users_id: id,
         nama_perusahaan: req.body.nama_perusahaan,
       };
-     const result = await createUsers(data);
+      
+      const result = await createUsers(data);
       if (role === "perekrut") {
         await createPerekrut(data_perekrut);
       } else if (role === "pekerja") {
         await createPekerja({ users_id: id });
-        await insertSkill({users_id: id}); 
+        await insertSkill({ users_id: id });
+        await createUsersVerification(users_verification_id, id, token);
+
       }
-      commonHelper.response(res, result.rows, 201, "Create User Success");
+      commonHelper.response(
+        res,
+        201,
+        "Sign Up Success, Please check your email for verification"
+      );
     } catch (err) {
       console.error(err);
+      res.status(500).send(err.message);
+    }
+  },
+
+  VerifyAccount: async (req, res) => {
+    try {
+      const queryUsersId = req.query.id;
+      const queryToken = req.query.token;
+
+      if (typeof queryUsersId === "string" && typeof queryToken === "string") {
+        const checkUsersVerify = await findUUID(queryUsersId);
+
+        if (checkUsersVerify.rowCount == 0) {
+          return commonHelper.response(
+            res,
+            null,
+            403,
+            "Error users has not found"
+          );
+        }
+
+        if (checkUsersVerify.rows[0].verify != "false") {
+          return commonHelper.response(
+            res,
+            null,
+            403,
+            "Users has been verified"
+          );
+        }
+
+        const result = await checkUsersVerification(
+          queryUsersId,
+          queryToken
+        );
+
+        if (result.rowCount == 0) {
+          return commonHelper.response(
+            res,
+            null,
+            403,
+            "Error invalid credential verification"
+          );
+        } else {
+          await updateAccountVerification(queryUsersId);
+          await deleteUsersVerification(queryUsersId, queryToken);
+          commonHelper.response(res, null, 200, "Users verified succesful");
+        }
+      } else {
+        return commonHelper.response(
+          res,
+          null,
+          403,
+          "Invalid url verification"
+        );
+      }
+    } catch (error) {
+      console.log(error);
       res.status(500).send(err.message);
     }
   },
@@ -193,12 +272,19 @@ const usersController = {
   loginUsers: async (req, res) => {
     try {
       const { error } = loginSchema.validate(req.body);
-    if (error) {
-      res.status(400).json({ message: error.details[0].message });
-      return;
-    }
+      if (error) {
+        res.status(400).json({ message: error.details[0].message });
+        return;
+      }
 
       const { email, password } = req.body;
+      const {rows: [verify]} = await cekUser(email);
+      console.log(verify.verify);
+      if (verify.verify==="false") {
+        return res.json({
+          message:"user is unverify"
+        })
+      }
 
       const {
         rows: [users],
@@ -220,12 +306,17 @@ const usersController = {
 
       users.token_user = authHelper.generateToken(payload);
       users.refreshToken = authHelper.generateRefreshToken(payload);
-
+      
       commonHelper.response(res, users, 201, "Login Successfully");
     } catch (err) {
       console.log(error);
       res.status(500).json({ message: "Internal server error" });
     }
+  },
+
+  sendEmail: async (req, res, next) => {
+    const { email } = req.body;
+    await sendEmail(email, "Verify Email", url);
   },
 
   refreshToken: (req, res) => {

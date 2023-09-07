@@ -16,8 +16,6 @@ const selectAllUsers = ({ limit, offset, sort, sortby }) => {
   );
 };
 
-
-
 //GET SELECT USERS
 const selectUsers = (id) => {
   return Pool.query(`SELECT * FROM users WHERE id = '${id}'`);
@@ -34,16 +32,17 @@ const createUsers = (data) => {
     id,
     email,
     passwordHash,
-    confirmpasswordHash, 
+    confirmpasswordHash,
     name,
     phone,
     jabatan,
     role,
+    verify,
   } = data;
   return Pool.query(
-    `INSERT INTO users(id, email, password, confirmpassword, name, phone, jabatan, role) 
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-    [id, email, passwordHash, confirmpasswordHash, name, phone, jabatan, role]
+    `INSERT INTO users(id, email, password, confirmpassword, name, phone, jabatan, role, verify) 
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+    [id, email, passwordHash, confirmpasswordHash, name, phone, jabatan, role,verify]
   );
 };
 
@@ -59,9 +58,8 @@ const createPekerja = (data) => {
   return Pool.query(qry, [users_id]);
 };
 
-
 const updateUsersPerekrut = (data) => {
-  const { id, name,phone, jabatan } = data;
+  const { id, name, phone, jabatan } = data;
   return Pool.query(
     `UPDATE users SET jabatan = '${jabatan}', name = '${name}', phone = '${phone}' WHERE id = '${id}'`
   );
@@ -74,20 +72,16 @@ const updateUsersPekerja = (data) => {
   );
 };
 
-
 //FIND EMAIL
 const findUUID = (id) => {
   return new Promise((resolve, reject) =>
-    Pool.query(
-      `SELECT * FROM users WHERE id= '${id}' `,
-      (error, result) => {
-        if (!error) {
-          resolve(result);
-        } else {
-          reject(error);
-        }
+    Pool.query(`SELECT * FROM users WHERE id= '${id}' `, (error, result) => {
+      if (!error) {
+        resolve(result);
+      } else {
+        reject(error);
       }
-    )
+    })
   );
 };
 
@@ -97,7 +91,7 @@ const findEmail = (email) => {
       `SELECT * FROM users WHERE email='${email}' `,
       (error, result) => {
         if (!error) {
-          console.log("User data found:", result.rows[0]);
+          // console.log("User data found:", result.rows[0]);
           resolve(result);
         } else {
           console.error("Error finding user by email:", error);
@@ -112,6 +106,26 @@ const countData = () => {
   return Pool.query(`SELECT COUNT(*) FROM users`);
 };
 
+const createUsersVerification = (users_verification_id, users_id, token) => {
+  return Pool.query(`insert into users_verification ( id , users_id , token ) values ( '${users_verification_id}' , '${users_id}' , '${token}' )`);
+};
+
+const checkUsersVerification = (queryUsersId, queryToken) => {
+  return Pool.query(`select * from users_verification where users_id='${queryUsersId}' and token = '${queryToken}' `);
+};
+
+const cekUser = (email) => {
+  return Pool.query(`select verify from users where email = '${email}' `);
+};
+
+const deleteUsersVerification = (queryUsersId, queryToken) => {
+  return Pool.query(`delete from users_verification  where users_id='${queryUsersId}' and token = '${queryToken}' `);
+};
+
+const updateAccountVerification = (queryUsersId) => {
+  return Pool.query(`update users set verify='true' where id='${queryUsersId}' `);
+}
+
 module.exports = {
   selectAllUsers,
   selectUsers,
@@ -124,4 +138,9 @@ module.exports = {
   findUUID,
   findEmail,
   countData,
+  createUsersVerification,
+  checkUsersVerification,
+  cekUser,
+  deleteUsersVerification,
+  updateAccountVerification,
 };
