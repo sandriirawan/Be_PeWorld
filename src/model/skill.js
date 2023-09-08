@@ -1,4 +1,5 @@
 const Pool = require("../config/db");
+const { v4: uuidv4 } = require("uuid");
 
 
 
@@ -20,9 +21,10 @@ const selectSkill = (users_id) => {
 // INSERT skill
 const insertSkill = (data) => {
   const { users_id } = data;
-  return Pool.query(
-    `INSERT INTO skill (users_id) 
-    VALUES( '${users_id}')`
+  const id = uuidv4(); 
+    return Pool.query(
+    `INSERT INTO skill (id,users_id) 
+    VALUES('${id}', '${users_id}')`
   );
 };
 

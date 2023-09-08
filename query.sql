@@ -1,4 +1,4 @@
--- Active: 1690780015370@@127.0.0.1@5432@peworld
+-- Active: 1694109783523@@147.139.210.135@5432@sandri03
 
 CREATE TABLE
     users (
@@ -13,10 +13,10 @@ CREATE TABLE
         verify text not null,
         updated_on timestamp default CURRENT_TIMESTAMP not null
     );
-
+--  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
 CREATE TABLE
     perekrut (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+        id VARCHAR PRIMARY KEY,
         users_id VARCHAR NOT NULL,
         foto_perusahaan VARCHAR(255),
         nama_perusahaan VARCHAR(255),
@@ -31,7 +31,7 @@ CREATE TABLE
 
 CREATE TABLE
     pekerja (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+         id VARCHAR PRIMARY KEY,
         users_id VARCHAR NOT NULL,
         foto_pekerja VARCHAR(255),
         job_desk VARCHAR(255),
@@ -39,6 +39,7 @@ CREATE TABLE
         tempat_kerja VARCHAR(255),
         provinsi VARCHAR(100),
         kota VARCHAR(100),
+        email VARCHAR(100),
         instagram VARCHAR,
         github VARCHAR,
         linkedin VARCHAR
@@ -50,7 +51,7 @@ SELECT * FROM pekerja;
 
 CREATE TABLE
     skill (
-        id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+         id VARCHAR PRIMARY KEY,
         users_id VARCHAR NOT NULL,
         nama_skill VARCHAR
     );
@@ -79,36 +80,24 @@ CREATE TABLE
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
 
-CREATE TABLE
-    Messages (
-        id VARCHAR PRIMARY KEY,
-        users_id_perekrut VARCHAR NOT NULL,
-        users_id_pekerja VARCHAR NOT NULL,
-        posisi VARCHAR(255) NOT NULL,
-        message_detail TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (users_id_perekrut) REFERENCES Users (id),
-        FOREIGN KEY (users_id_pekerja) REFERENCES Users (id)
-    );
-
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-DROP TABLE users;
+DROP TABLE pekerja;
 
-CREATE FUNCTION UPDATE_UPDATED_ON_USERS() RETURNS TRIGGER 
-AS $$ 
-	$$ BEGIN NEW.updated_on = now();
-	RETURN NEW;
-	END;
-	$$ language 'plpgsql';
+CREATE FUNCTION UPDATE_UPDATED_ON_USERS() RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_on = NOW();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
 
-CREATE TRIGGER UPDATE_USERS_UPDATED_ON 
-	update_users_updated_on BEFORE
-	UPDATE ON users FOR EACH ROW
-	EXECUTE
-	    PROCEDURE update_updated_on_users();
+
+CREATE TRIGGER update_users_updated_on
+BEFORE UPDATE ON users
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_on_users();
+
 
 
 CREATE TABLE users_verification (

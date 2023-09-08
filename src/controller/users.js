@@ -159,16 +159,13 @@ const usersController = {
         await createPekerja({ users_id: id });
         await insertSkill({ users_id: id });
         await createUsersVerification(users_verification_id, id, token);
-
       }
-      commonHelper.response(
-        res,
-        201,
-        "Sign Up Success, Please check your email for verification"
-      );
+      return res.status(201).json({
+        message: "Sign Up Success, Please check your email for verification"
+      });
     } catch (err) {
       console.error(err);
-      res.status(500).send(err.message);
+      return res.status(500).send(err.message);
     }
   },
 
@@ -271,42 +268,37 @@ const usersController = {
 
   loginUsers: async (req, res) => {
     try {
-      const { error } = loginSchema.validate(req.body);
-      if (error) {
-        res.status(400).json({ message: error.details[0].message });
-        return;
-      }
 
+  
       const { email, password } = req.body;
-      const {rows: [verify]} = await cekUser(email);
-      console.log(verify.verify);
-      if (verify.verify==="false") {
+      const { rows: [verify] } = await cekUser(email);
+  
+      if (verify.verify === "false") {
         return res.json({
-          message:"user is unverify"
-        })
+          message: "User is unverified. Please verify your account.",
+        });
       }
-
-      const {
-        rows: [users],
-      } = await findEmail(email);
-
+  
+      const { rows: [users] } = await findEmail(email);
+  
       if (!users) {
-        return res.json({ message: "Email salah" });
+        return res.status(404).json({ message: "Email not found" });
       }
-
+      
       const isValidPassword = bcrypt.compareSync(password, users.password);
       if (!isValidPassword) {
-        return res.json({ message: "Password salah" });
+        return res.status(401).json({ message: "Invalid password" });
       }
-
+      
+  
       delete users.passwordHash;
       const payload = {
         email: users.email,
       };
-
+  
       users.token_user = authHelper.generateToken(payload);
       users.refreshToken = authHelper.generateRefreshToken(payload);
-      
+  
       commonHelper.response(res, users, 201, "Login Successfully");
     } catch (err) {
       console.log(error);
