@@ -158,8 +158,8 @@ const usersController = {
       } else if (role === "pekerja") {
         await createPekerja({ users_id: id });
         await insertSkill({ users_id: id });
-        await createUsersVerification(users_verification_id, id, token);
       }
+      await createUsersVerification(users_verification_id, id, token);
       return res.status(201).json({
         message: "Sign Up Success, Please check your email for verification"
       });
