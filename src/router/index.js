@@ -6,6 +6,7 @@ const pekerjaRouter = require("../router/pekerjaRouter");
 const pengalamanRouter = require("../router/pengalamanRouter");
 const portofolioRouter = require("../router/portofolioRouter");
 const skillRouter = require("../router/skillRouter");
+const hireRouter = require("../router/hireRouter");
 
 
 
@@ -16,6 +17,7 @@ router.use("/pekerja", pekerjaRouter);
 router.use("/pengalaman", pengalamanRouter);
 router.use("/portofolio", portofolioRouter);
 router.use("/skill", skillRouter);
+router.use("/hire", hireRouter);
 
 
 

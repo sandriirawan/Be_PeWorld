@@ -13,7 +13,9 @@ CREATE TABLE
         verify text not null,
         updated_on timestamp default CURRENT_TIMESTAMP not null
     );
+
 --  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+
 CREATE TABLE
     perekrut (
         id VARCHAR PRIMARY KEY,
@@ -31,7 +33,7 @@ CREATE TABLE
 
 CREATE TABLE
     pekerja (
-         id VARCHAR PRIMARY KEY,
+        id VARCHAR PRIMARY KEY,
         users_id VARCHAR NOT NULL,
         foto_pekerja VARCHAR(255),
         job_desk VARCHAR(255),
@@ -51,7 +53,7 @@ SELECT * FROM pekerja;
 
 CREATE TABLE
     skill (
-         id VARCHAR PRIMARY KEY,
+        id VARCHAR PRIMARY KEY,
         users_id VARCHAR NOT NULL,
         nama_skill VARCHAR
     );
@@ -82,30 +84,46 @@ CREATE TABLE
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-DROP TABLE pekerja;
 
-CREATE FUNCTION UPDATE_UPDATED_ON_USERS() RETURNS TRIGGER AS $$
-BEGIN
-  NEW.updated_on = NOW();
-  RETURN NEW;
+CREATE FUNCTION UPDATE_UPDATED_ON_USERS() RETURNS TRIGGER 
+AS $$ 
+	$$ $$ BEGIN NEW.updated_on = NOW();
+
+
+RETURN NEW;
+
 END;
+
 $$ LANGUAGE plpgsql;
 
+CREATE TRIGGER UPDATE_USERS_UPDATED_ON 
+	UPDATE_USERS_UPDATED_ON update_users_updated_on BEFORE
+	UPDATE ON users FOR EACH ROW
+	EXECUTE
+	    FUNCTION update_updated_on_users();
 
 
-CREATE TRIGGER update_users_updated_on
-BEFORE UPDATE ON users
-FOR EACH ROW
-EXECUTE FUNCTION update_updated_on_users();
+CREATE TABLE
+    users_verification (
+        id TEXT NOT NULL,
+        users_id VARCHAR,
+        token TEXT,
+        created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+        CONSTRAINT fk_users_verification_users FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE,
+        PRIMARY KEY (id)
+    );
 
+CREATE TABLE
+    hire (
+        id VARCHAR PRIMARY KEY,
+        title VARCHAR NOT NULL,
+        desciption TEXT,
+        pekerja_id VARCHAR(255) NOT NULL,
+        perekrut_id VARCHAR(255) NOT NULL,
+        pekerja_name VARCHAR(255) NOT NULL,
+        pekerja_email VARCHAR(255) NOT NULL,
+        perekrut_compname VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
 
-
-CREATE TABLE users_verification (
-    id TEXT NOT NULL,
-    users_id VARCHAR,
-    token TEXT,
-    created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT fk_users_verification_users
-        FOREIGN KEY (users_id) REFERENCES users(id) ON DELETE CASCADE,
-    PRIMARY KEY (id)
-);
+    DROP TABLE hire;

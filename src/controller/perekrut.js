@@ -82,14 +82,15 @@ const perekrutController = {
         return;
       }
       const users_id = String(req.params.id);
-      const { file } = req;
   
       const getUserId = await getDetailPerekrut(users_id);
       const user = getUserId.rows[0];
 
   
+      const { file } = req;
+      let foto_perusahaan = user.photo;
       if (file && file.path) {
-        const result = await cloudinary.uploader.upload(req.file.path);
+        const result = await cloudinary.uploader.upload(file.path);
         foto_perusahaan = result.secure_url;
       }
       const {
