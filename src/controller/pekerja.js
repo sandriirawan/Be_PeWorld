@@ -114,16 +114,16 @@ const pekerjaController = {
       const data = {
         users_id,
         foto_pekerja: foto_pekerja || user.foto_pekerja,
-        job_desk: job_desk || "",
-        deskripsi_singkat: deskripsi_singkat || "",
-        tempat_kerja: tempat_kerja || "",
-        kota: kota || "",
-        provinsi: provinsi || "",
-        instagram: instagram || "",
-        github: github || "",
-        linkedin: linkedin || "",
-        email: email || "",
-        name: name || "",
+        job_desk: job_desk || user.job_desk,
+        deskripsi_singkat: deskripsi_singkat || user.deskripsi_singkat,
+        tempat_kerja: tempat_kerja || user.tempat_kerja,
+        kota: kota || user.kota,
+        provinsi: provinsi || user.provinsi,
+        instagram: instagram || user.instagram,
+        github: github || user.github,
+        linkedin: linkedin || user.linkedin,
+        email: email || user.email,
+        name: name || user.name,
       };
 
       await updatePekerja(data);

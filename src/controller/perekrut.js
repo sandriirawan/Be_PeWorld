@@ -114,15 +114,15 @@ const perekrutController = {
       const data = {
         users_id,
         foto_perusahaan: foto_perusahaan|| user.foto_perusahaan,
-        nama_perusahaan: nama_perusahaan|| "",
-        bidang_perusahaan: bidang_perusahaan|| "",
-        provinsi: provinsi|| "",
-        kota: kota|| "",
-        info_perusahaan: info_perusahaan|| "",
-        email_perusahaan: email_perusahaan|| "",
-        phone_perusahaan: phone_perusahaan|| "",
-        linkedin: linkedin|| "",
-        jabatan: jabatan|| "", 
+        nama_perusahaan: nama_perusahaan|| user.nama_perusahaan,
+        bidang_perusahaan: bidang_perusahaan|| user.bidang_perusahaan,
+        provinsi: provinsi|| user.provinsi,
+        kota: kota|| user.kota,
+        info_perusahaan: info_perusahaan|| user.info_perusahaan,
+        email_perusahaan: email_perusahaan|| user.email_perusahaan,
+        phone_perusahaan: phone_perusahaan|| user.phone_perusahaan,
+        linkedin: linkedin|| user.linkedin,
+        jabatan: jabatan|| user.jabatan, 
       };
   
       updatePerekrut(data)
